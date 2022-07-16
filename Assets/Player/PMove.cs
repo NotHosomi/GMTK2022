@@ -6,30 +6,28 @@ using UnityEngine;
 public class PMove : MonoBehaviour
 {
     //Controller 
-    public float g_gravity = 20.0f;
-    public float g_friction = 6;
-    public float mv_maxSpeed = 15.0f;
-    public float mv_acceleration = 14.0f;
-    public float mv_deceleration = 10.0f;
-    public float mv_airControl = 0.3f; //obsolete
-    public float mv_strafeSpeed = 1.0f; //obsolete
-    public float mv_jumpSpeed = 8.0f;
+    public float mv_gravity;
+    public float mv_friction;
+    public float mv_maxSpeed;
+    public float mv_acceleration;
+    public float mv_airacceleration;
+    public float mv_deceleration;
+    public float mv_airControl; //obsolete
+    public float mv_strafeSpeed; //obsolete
+    public float mv_jumpSpeed;
     //Camera controls
     float rotX = 0;
     float rotY = 0;
-    //frame shit
-    public float fpsDisplayRate = 4.0f; // 4 updates per sec
-    private int frameCount = 0;
-    private float dt = 0.0f;
     //components
     private Rigidbody rb;
     private Transform cam_transform;
     private Vector3 vel = Vector3.zero;
-    //Q3 Jump Queue
+    Vector3 wishDir;
+    // Jumping
     private bool wishJump = false;
     public bool isGrounded = false;
 
-    public Animator c_animator;
+    LayerMask LM;
 
     // Use this for initialization
     void Start()
@@ -44,6 +42,8 @@ public class PMove : MonoBehaviour
         {
             Debug.Log("no rb");
         }
+
+        LM = ~LayerMask.GetMask("Player_hull", "Player_hitbox", "Projectiles", "3D UI");
     }
 
     // Update is called once per frame
@@ -56,9 +56,14 @@ public class PMove : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
         }
 
+        UnitsPerSecond();
         CameraRotation();
-
         Movement();
+    }
+
+    private void LateUpdate()
+    {
+        
     }
 
     private void CameraRotation()
@@ -87,7 +92,7 @@ public class PMove : MonoBehaviour
     {
         vel = rb.velocity;
 
-        Vector3 wishDir = new Vector3(0, 0, 0);
+        wishDir = new Vector3(0, 0, 0);
         if (Input.GetKey(KeyCode.W))
             wishDir.z += 1;
         if (Input.GetKey(KeyCode.S))
@@ -113,8 +118,8 @@ public class PMove : MonoBehaviour
         if(Input.GetKeyUp(KeyCode.Space))
             wishJump = false;
            
-
-        vel.y = 0;
+        if(vel.y < 0)
+            vel.y = 0;
         if (wishJump)
         {
             vel.y = mv_jumpSpeed;
@@ -122,17 +127,15 @@ public class PMove : MonoBehaviour
             return;
         }
         Accelerate(wishDir);
-        float magni = rb.velocity.magnitude;
-        if (wishDir.sqrMagnitude == 0)
-            ApplyFriction();
-        else if (magni > mv_maxSpeed)
-            rb.velocity *= (mv_maxSpeed / magni);
+        ApplyFriction();
+        if (vel.magnitude > mv_maxSpeed)
+            vel *= (mv_maxSpeed / vel.magnitude);
 
     }
     
     private void AirMove(Vector3 wishDir)
     {
-        Accelerate(wishDir);
+        AirAccelerate(wishDir);
 
         Ray upCast = new Ray(transform.position, Vector3.up);
         bool headBump = Physics.SphereCast(upCast, 0.49f, 0.52f, 9);
@@ -145,7 +148,7 @@ public class PMove : MonoBehaviour
         }
 
         // Apply gravity
-        vel.y = vel.y - (g_gravity * Time.deltaTime);
+        vel.y -= mv_gravity * Time.deltaTime;
     }
 
     private void Accelerate(Vector3 wishdir)
@@ -176,9 +179,8 @@ public class PMove : MonoBehaviour
         wishdir = Quaternion.Euler(0, cam_angle, 0) * wishdir;
         wishdir.Normalize();
 
-        //TODO re make
         float currentSpeed = Vector3.Dot(vel.normalized, wishdir) * vel.magnitude;
-        float addSpeed = mv_acceleration;
+        float addSpeed = mv_airacceleration;
         if (currentSpeed + addSpeed > mv_maxSpeed)
             addSpeed = mv_maxSpeed - currentSpeed;
 
@@ -192,9 +194,6 @@ public class PMove : MonoBehaviour
 
     private void ApplyFriction()
     {
-        rb.velocity *= 0;
-        return;
-
         Vector3 vec = vel;
         float speed;
         float newspeed;
@@ -202,14 +201,9 @@ public class PMove : MonoBehaviour
 
         vec.y = 0.0f;
         speed = vec.magnitude;
-        drop = 0.0f;
 
-        //Only if the player is on the ground apply friction
-        if (isGrounded)
-        {
-            drop = speed < mv_deceleration ? mv_deceleration : speed;      //c_deceleration if (speed < c_deceleration) is true, speed if (speed < c_deceleration) is false
-            drop = drop * g_friction * Time.deltaTime;
-        }
+        drop = speed < mv_deceleration ? mv_deceleration : speed;      //c_deceleration if (speed < c_deceleration) is true, speed if (speed < c_deceleration) is false
+        drop = drop * mv_friction * Time.deltaTime;
 
         newspeed = speed - drop;
         if (newspeed < 0)
@@ -218,29 +212,46 @@ public class PMove : MonoBehaviour
             newspeed /= speed;
 
         vel.x *= newspeed;
-        vel.y *= newspeed;
+        vel.z *= newspeed;
+        newspeeddebug = newspeed;
     }
+    float newspeeddebug;
 
     private void CheckGrounded()
     {
-        LayerMask LM = LayerMask.GetMask("Player", "Projectiles");
-        Collider[] hits = Physics.OverlapBox(transform.position - new Vector3(0, -1, 0),
+        Collider[] hits = Physics.OverlapBox(transform.position - new Vector3(0, 1, 0),
                                     new Vector3(0.49f, 0.01f, 0.49f),
                                     Quaternion.identity,
                                     LM);
         isGrounded = hits.Length > 0;
     }
 
+    float UPS_timer = 0;
+    float UPS;
+    float UPF_sum = 0;
+    float UPS_rate = 4;
+    void UnitsPerSecond()
+    {
+        UPF_sum += vel.magnitude * Time.deltaTime;
+        UPS_timer += Time.deltaTime;
+        if (UPS_timer > 1.0 / UPS_rate)
+        {
+            UPS = Mathf.Round((UPF_sum / UPS_timer)*100)/100;
+            UPF_sum = 0;
+            UPS_timer -= 1.0f / UPS_rate;
+        }
+    }
+
 
     public GUIStyle guiStyle;
-    public GameObject UPS_bar;
     void OnGUI()
     {
-        Vector3 v = rb.velocity;
-        v.y = 0;
-        GUI.Label(new Rect(new Vector2(5,5), new Vector2(300,300)), "UPS: " + v.magnitude, guiStyle);
-        Vector3 s = UPS_bar.transform.localScale;
-        s.x = 0.001f * v.magnitude;
-        UPS_bar.transform.localScale = s;
+        GUI.Label(new Rect(new Vector2(5,5), new Vector2(300,300)), "UPS: " + UPS + "\nIsGrounded: " + isGrounded, guiStyle);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawCube(transform.position - new Vector3(0, 1, 0), new Vector3(0.49f, 0.01f, 0.49f) * 2);
     }
 }
