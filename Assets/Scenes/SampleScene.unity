@@ -222,6 +222,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &195806025 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 122780f6f68767349886b36f51dc7716, type: 3}
+  m_PrefabInstance: {fileID: 336923126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &195806029
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 195806025}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: 122780f6f68767349886b36f51dc7716, type: 3}
 --- !u!1 &213857789
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,6 +937,7 @@ MonoBehaviour:
   mv_friction: 10
   mv_maxSpeed: 8
   mv_acceleration: 3
+  mv_airacceleration: 0
   mv_deceleration: 3
   mv_airControl: 0.3
   mv_strafeSpeed: 1
@@ -990,7 +1010,6 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
-  UPS_bar: {fileID: 0}
 --- !u!4 &882828408
 Transform:
   m_ObjectHideFlags: 0
