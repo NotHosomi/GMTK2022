@@ -88,7 +88,7 @@ public class PAttack : MonoBehaviour
         {
             Vector3 pos = transform.position;
             GameObject d = Instantiate(projectile, pos, Random.rotation);
-            Vector3 vel = (Camera.main.transform.forward + Vector3.up * 0.25f) * 10f + GetComponent<Rigidbody>().velocity;
+            Vector3 vel = (Camera.main.transform.forward + Vector3.up * 0.25f) * 10f + 0.1f * GetComponent<Rigidbody>().velocity;
             vel.x += Random.Range(-0.25f, 0.25f);
             vel.y += Random.Range(-0.25f, 0.25f);
             d.GetComponent<Rigidbody>().velocity = vel;
