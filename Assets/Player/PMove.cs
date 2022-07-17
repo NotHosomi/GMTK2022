@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class PMove : MonoBehaviour
 {
+    int hp = 10;
+    public bool dead = false;
+    public static PMove instance;
     //Controller 
     public float mv_gravity;
     public float mv_friction;
@@ -32,6 +35,8 @@ public class PMove : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        if(instance == null)
+            instance = this;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         
@@ -58,12 +63,8 @@ public class PMove : MonoBehaviour
 
         UnitsPerSecond();
         CameraRotation();
-        Movement();
-    }
-
-    private void LateUpdate()
-    {
-        
+        if(!dead)
+            Movement();
     }
 
     private void CameraRotation()
@@ -244,12 +245,30 @@ public class PMove : MonoBehaviour
     public GUIStyle guiStyle;
     void OnGUI()
     {
-        GUI.Label(new Rect(new Vector2(5,5), new Vector2(300,300)), "UPS: " + UPS + "\nIsGrounded: " + isGrounded, guiStyle);
+        //GUI.Label(new Rect(new Vector2(5,5), new Vector2(300,300)), "UPS: " + UPS + "\nHP: " + hp, guiStyle);
+        GUI.Label(new Rect(new Vector2(5,5), new Vector2(300,300)), "HP: " + hp, guiStyle);
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawCube(transform.position - new Vector3(0, 1, 0), new Vector3(0.29f, 0.01f, 0.29f) * 2);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        EnemyHP e = other.GetComponent<EnemyHP>();
+        if (e != null)
+        {
+            --hp;
+            if(hp == 0)
+            {
+                Vector3 pos = Camera.main.transform.position;
+                pos.y = -0.8f;
+                Camera.main.transform.position = pos;
+                dead = true;
+            }
+        }
+            
     }
 }

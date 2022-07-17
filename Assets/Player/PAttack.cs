@@ -84,6 +84,8 @@ public class PAttack : MonoBehaviour
 
     void throwDice(int[] dice)
     {
+        if (PMove.instance.dead)
+            return;
         for(int i = 0; i < dice.Length; ++i)
         {
             Vector3 pos = transform.position;
