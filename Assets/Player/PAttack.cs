@@ -6,54 +6,46 @@ using System.Linq;
 public class PAttack : MonoBehaviour
 {
     [SerializeField] GameObject[] UI_dice;
+    [SerializeField] GameObject projectile;
     int LM;
     GameObject highlight_face;
+
+    int[] v;
 
     // Start is called before the first frame update
     void Start()
     {
         LM = LayerMask.GetMask("3D UI");
 
-        RaycastHit hit;
-        if (Physics.Linecast(Camera.main.transform.position, UI_dice[0].transform.position, out hit, LM))
+        v = new int[UI_dice.Length];
+
+        for (int i = 0; i < UI_dice.Length; ++i)
         {
-            highlight_face = hit.collider.gameObject;
+            v[i] = findDiceValue(i);
+            highlight_face = UI_dice[i].transform.GetChild(v[i] - 1).gameObject;
             setAlpha(highlight_face, 0.5f);
-            Debug.Log("Current face: " + highlight_face.name);
-            
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        int[] v = new int[UI_dice.Length];
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            throwDice(v);
+        }
+    }
+
+    private void FixedUpdate()
+    {
         for (int i = 0; i < UI_dice.Length; ++i)
         {
             v[i] = findDiceValue(i);
             setAlpha(highlight_face, 0);
-            highlight_face = UI_dice[i].transform.GetChild(v[i]-1).gameObject;
+            highlight_face = UI_dice[i].transform.GetChild(v[i] - 1).gameObject;
             setAlpha(highlight_face, 0.5f);
         }
-
-        //RaycastHit hit;
-        //if (Physics.Linecast(Camera.main.transform.position, UI_dice[0].transform.position, out hit, LM))
-        //{
-        //    if(hit.collider.gameObject != highlight_face)
-        //    {
-        //        if (highlight_face != null)
-        //            setAlpha(highlight_face, 0);
-        //        highlight_face = hit.collider.gameObject;
-        //        setAlpha(highlight_face, 0.5f);
-        //        Debug.Log("Current face: " + highlight_face.name);
-        //    }
-        //}
-        //else
-        //{
-        //    Debug.LogError("No dice collider located for UI dice 0");
-        //}
-        //
-        //Debug.DrawLine(Camera.main.transform.position, UI_dice[0].transform.position, Color.red, 5);
     }
 
     void setAlpha(GameObject go, float a)
@@ -89,4 +81,19 @@ public class PAttack : MonoBehaviour
             default: return 0;
         }
     }
+
+    void throwDice(int[] dice)
+    {
+        for(int i = 0; i < dice.Length; ++i)
+        {
+            Vector3 pos = transform.position;
+            GameObject d = Instantiate(projectile, pos, Random.rotation);
+            Vector3 vel = (Camera.main.transform.forward + Vector3.up * 0.25f) * 10f + GetComponent<Rigidbody>().velocity;
+            vel.x += Random.Range(-0.25f, 0.25f);
+            vel.y += Random.Range(-0.25f, 0.25f);
+            d.GetComponent<Rigidbody>().velocity = vel;
+            d.GetComponent<PProjectile>().damage = dice[i];
+        }
+    }
+
 }

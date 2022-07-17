@@ -43,7 +43,7 @@ public class PMove : MonoBehaviour
             Debug.Log("no rb");
         }
 
-        LM = ~LayerMask.GetMask("Player_hull", "Player_hitbox", "Projectiles", "3D UI");
+        LM = ~LayerMask.GetMask("Player_hull", "Player_hitbox", "Player_projectile", "Enemy_projectile", "3D UI");
     }
 
     // Update is called once per frame
@@ -130,7 +130,6 @@ public class PMove : MonoBehaviour
         ApplyFriction();
         if (vel.magnitude > mv_maxSpeed)
             vel *= (mv_maxSpeed / vel.magnitude);
-
     }
     
     private void AirMove(Vector3 wishDir)
@@ -158,14 +157,13 @@ public class PMove : MonoBehaviour
         wishdir = Quaternion.Euler(0, cam_angle, 0) * wishdir;
         wishdir.Normalize();
 
-        //TODO re make
         float currentSpeed = Vector3.Dot(vel.normalized, wishdir) * vel.magnitude;
         float addSpeed = mv_acceleration;
         if (currentSpeed + addSpeed > mv_maxSpeed)
             addSpeed = mv_maxSpeed - currentSpeed;
 
         Vector3 wishVel = wishdir * addSpeed;
-        vel += new Vector3(wishVel.x, vel.y, wishVel.z);
+        vel += new Vector3(wishVel.x, 0, wishVel.z);
 
         Debug.DrawRay(transform.position, wishdir * 1f, Color.blue);
         Debug.DrawRay(transform.position, vel.normalized * 3f, Color.yellow);
@@ -185,7 +183,7 @@ public class PMove : MonoBehaviour
             addSpeed = mv_maxSpeed - currentSpeed;
 
         Vector3 wishVel = wishdir * addSpeed;
-        vel += new Vector3(wishVel.x, vel.y, wishVel.z);
+        vel += new Vector3(wishVel.x, 0, wishVel.z);
 
         Debug.DrawRay(transform.position, wishdir * 1f, Color.blue);
         Debug.DrawRay(transform.position, vel.normalized * 3f, Color.yellow);
@@ -220,24 +218,24 @@ public class PMove : MonoBehaviour
     private void CheckGrounded()
     {
         Collider[] hits = Physics.OverlapBox(transform.position - new Vector3(0, 1, 0),
-                                    new Vector3(0.49f, 0.01f, 0.49f),
+                                    new Vector3(0.29f, 0.01f, 0.29f),
                                     Quaternion.identity,
-                                    LM);
+                                    LM, QueryTriggerInteraction.Ignore);
         isGrounded = hits.Length > 0;
     }
 
     float UPS_timer = 0;
     float UPS;
-    float UPF_sum = 0;
+    Vector3 UPF_sum;
     float UPS_rate = 4;
     void UnitsPerSecond()
     {
-        UPF_sum += vel.magnitude * Time.deltaTime;
+        UPF_sum += vel * Time.deltaTime;
         UPS_timer += Time.deltaTime;
         if (UPS_timer > 1.0 / UPS_rate)
         {
-            UPS = Mathf.Round((UPF_sum / UPS_timer)*100)/100;
-            UPF_sum = 0;
+            UPS = Mathf.Round((UPF_sum.magnitude / UPS_timer)*100)/100;
+            UPF_sum = new Vector3();
             UPS_timer -= 1.0f / UPS_rate;
         }
     }
@@ -252,6 +250,6 @@ public class PMove : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawCube(transform.position - new Vector3(0, 1, 0), new Vector3(0.49f, 0.01f, 0.49f) * 2);
+        Gizmos.DrawCube(transform.position - new Vector3(0, 1, 0), new Vector3(0.29f, 0.01f, 0.29f) * 2);
     }
 }
