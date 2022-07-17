@@ -266,6 +266,7 @@ public class PMove : MonoBehaviour
                 Vector3 pos = Camera.main.transform.position;
                 pos.y = -0.8f;
                 Camera.main.transform.position = pos;
+                rb.velocity *= 0;
                 dead = true;
             }
         }

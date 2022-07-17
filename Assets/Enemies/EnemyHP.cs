@@ -14,6 +14,7 @@ public class EnemyHP : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         target = PMove.instance.gameObject.transform;
+        agent.SetDestination(target.position);
         AI_manager.instance.queue.Add(this);
     }
     public void damage(int dmg, Vector3 hit_loc)
@@ -23,6 +24,7 @@ public class EnemyHP : MonoBehaviour
         {
             Destroy(gameObject);
             AI_manager.instance.queue.Remove(this);
+            --AI_manager.total_enemies;
         }
 
         GameObject hitnum = Instantiate(hitnum_prefab, hit_loc, Quaternion.identity);

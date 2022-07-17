@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AI_manager : MonoBehaviour
 {
-
+    public static int total_enemies;
     public static AI_manager instance;
     public List<EnemyHP> queue;
     int index = 0;
@@ -23,11 +23,14 @@ public class AI_manager : MonoBehaviour
     {
         if (queue.Count == 0)
             return;
-        for (int i = 0; i < 5; ++i)
+        int m = queue.Count > 5 ? 5 : queue.Count;
+        for (int i = 0; i < m; ++i)
         {
+            Debug.Log("QC: " + queue.Count);
+            Debug.Log("index: " + index);
             queue[index].updateTarget();
             ++index;
-            if (index > queue.Count)
+            if (index >= queue.Count)
                 index = 0;
         }
     }
