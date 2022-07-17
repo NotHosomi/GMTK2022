@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class PMove : MonoBehaviour
@@ -59,6 +60,11 @@ public class PMove : MonoBehaviour
         {
             if (Input.GetButtonDown("Fire1"))
                 Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        if(Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+        {
+            SceneManager.LoadScene("MeinMenu");
         }
 
         UnitsPerSecond();

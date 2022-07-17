@@ -26,8 +26,6 @@ public class AI_manager : MonoBehaviour
         int m = queue.Count > 5 ? 5 : queue.Count;
         for (int i = 0; i < m; ++i)
         {
-            Debug.Log("QC: " + queue.Count);
-            Debug.Log("index: " + index);
             queue[index].updateTarget();
             ++index;
             if (index >= queue.Count)
