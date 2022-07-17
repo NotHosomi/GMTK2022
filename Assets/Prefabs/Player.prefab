@@ -546,7 +546,7 @@ BoxCollider:
   m_GameObject: {fileID: 6210387463089651351}
   m_Material: {fileID: 13400000, guid: db9bb89999cc2b543966c4d1fee21309, type: 2}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 0.6, y: 1.6, z: 0.6}
   m_Center: {x: 0, y: -0.2, z: 0}
@@ -559,7 +559,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 6210387463089651351}
   m_Material: {fileID: 13400000, guid: db9bb89999cc2b543966c4d1fee21309, type: 2}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   m_Radius: 0.3
   m_Height: 1.6
   m_Direction: 1
@@ -941,6 +941,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 276553de182185a46a17ec3538dcfcd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dead: 0
   mv_gravity: 20
   mv_friction: 10
   mv_maxSpeed: 8
